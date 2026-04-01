@@ -1,17 +1,22 @@
 import { useEffect, useState } from "react";
 
+type NewsItem = {
+  title: string;
+  link: string;
+  pubDate: string;
+  thumbnail: string;
+};
+
 export default function App() {
-  const [time, setTime] = useState<string>("");
-  const [weather, setWeather] = useState<string>("...");
-  const [news, setNews] = useState<any[]>([]);
+  const [time, setTime] = useState("");
+  const [weather, setWeather] = useState("...");
+  const [news, setNews] = useState<NewsItem[]>([]);
 
   useEffect(() => {
-    // ⏰ horloge
     const interval = setInterval(() => {
       setTime(new Date().toLocaleTimeString());
     }, 1000);
 
-    // 🌦 météo Paris (sécurisé)
     fetch("https://api.open-meteo.com/v1/forecast?latitude=48.85&longitude=2.35&current_weather=true")
       .then((r) => r.json())
       .then((d) => {
@@ -20,69 +25,44 @@ export default function App() {
       })
       .catch(() => setWeather("--"));
 
-    // 🧠 images thématiques fiables
-    const pickImage = (title: string = "") => {
+    const pickImage = (title = "") => {
       const t = title.toLowerCase();
 
-      if (t.match(/ukraine|russie|israel|gaza|attaque|armée|guerre|missile/)) {
-        return "https://loremflickr.com/800/400/war,conflict";
-      }
+      if (t.match(/ukraine|russie|israel|gaza|attaque|armée|guerre|missile/)) return "https://loremflickr.com/800/400/war";
+      if (t.match(/inflation|économie|bourse|marché|banque|taux|euro|pétrole/)) return "https://loremflickr.com/800/400/finance";
+      if (t.match(/football|psg|match|sport/)) return "https://loremflickr.com/800/400/sport";
+      if (t.match(/tech|ia|apple|google/)) return "https://loremflickr.com/800/400/technology";
+      if (t.match(/politique|gouvernement|élection/)) return "https://loremflickr.com/800/400/politics";
 
-      if (t.match(/inflation|économie|bourse|marché|banque|taux|euro|pétrole/)) {
-        return "https://loremflickr.com/800/400/finance,stock";
-      }
-
-      if (t.match(/football|psg|match|ligue|sport|tennis|rugby/)) {
-        return "https://loremflickr.com/800/400/football,sport";
-      }
-
-      if (t.match(/ia|intelligence artificielle|apple|google|microsoft|tech|numérique/)) {
-        return "https://loremflickr.com/800/400/technology,ai";
-      }
-
-      if (t.match(/macron|gouvernement|élection|politique|assemblée|ministre/)) {
-        return "https://loremflickr.com/800/400/politics,government";
-      }
-
-      if (t.match(/climat|météo|canicule|tempête|pluie|incendie/)) {
-        return "https://loremflickr.com/800/400/weather,climate";
-      }
-
-      const keywords = encodeURIComponent((title || "actu").split(" ").slice(0, 3).join(","));
-      return `https://loremflickr.com/800/400/${keywords}`;
+      return "https://loremflickr.com/800/400/news";
     };
 
-    // 📰 chargement news
     const loadNews = () => {
       fetch("https://api.rss2json.com/v1/api.json?rss_url=https://news.google.com/rss?hl=fr&gl=FR&ceid=FR:fr")
         .then((r) => r.json())
         .then((d) => {
           const items = (d?.items || []).slice(0, 4);
 
-          const formatted = items.map((n: any) => ({
+          const formatted: NewsItem[] = items.map((n: any) => ({
             title: n.title,
             link: n.link,
             pubDate: n.pubDate,
             thumbnail: pickImage(n.title),
           }));
 
-          setNews((prev: any[]) => {
-            const prevTitles = prev.map((n: any) => n.title).join("|");
-            const newTitles = formatted.map((n: any) => n.title).join("|");
-
-            if (prevTitles === newTitles) return prev;
-            return formatted;
+          setNews((prev) => {
+            const prevTitles = prev.map((n) => n.title).join("|");
+            const newTitles = formatted.map((n) => n.title).join("|");
+            return prevTitles === newTitles ? prev : formatted;
           });
         })
         .catch(() => {
-          setNews((prev: any[]) => prev.length ? prev : [
-            {
-              title: "Actualités indisponibles",
-              pubDate: new Date().toISOString(),
-              link: "https://news.google.com",
-              thumbnail: "https://loremflickr.com/800/400/news",
-            },
-          ]);
+          setNews((prev) => prev.length ? prev : [{
+            title: "Actualités indisponibles",
+            pubDate: new Date().toISOString(),
+            link: "https://news.google.com",
+            thumbnail: "https://loremflickr.com/800/400/news",
+          }]);
         });
     };
 
@@ -117,7 +97,7 @@ export default function App() {
         </div>
 
         <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-          {news.slice(0, 3).map((n: any, i: number) => (
+          {news.slice(0, 3).map((n, i) => (
             <a key={i} href={n.link} target="_blank" rel="noopener noreferrer" style={{ textDecoration: "none", color: "inherit" }}>
               <div style={{ display: i === 0 ? "block" : "flex", background: "white", borderRadius: i === 0 ? "30px" : "20px", overflow: "hidden", cursor: "pointer", boxShadow: "0 10px 25px rgba(0,0,0,0.08)" }}>
 
