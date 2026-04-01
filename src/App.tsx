@@ -67,8 +67,8 @@ export default function App() {
           }));
 
           setNews((prev: any[]) => {
-            const prevTitles = prev.map((n) => n.title).join("|");
-            const newTitles = formatted.map((n) => n.title).join("|");
+            const prevTitles = prev.map((n: any) => n.title).join("|");
+            const newTitles = formatted.map((n: any) => n.title).join("|");
 
             if (prevTitles === newTitles) return prev;
             return formatted;
