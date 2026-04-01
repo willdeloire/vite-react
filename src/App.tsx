@@ -43,7 +43,7 @@ export default function App() {
         .then((d) => {
           const items = (d?.items || []).slice(0, 4);
 
-          const formatted: NewsItem[] = items.map((n: any): NewsItem => ( ({
+          const formatted: NewsItem[] = items.map((n: any): NewsItem => ({
             title: n.title,
             link: n.link,
             pubDate: n.pubDate,
@@ -57,7 +57,7 @@ export default function App() {
           });
         })
         .catch(() => {
-          setNews((prev) => prev.length ? prev : [{
+          setNews((prev: NewsItem[]) => prev.length ? prev : [{
             title: "Actualités indisponibles",
             pubDate: new Date().toISOString(),
             link: "https://news.google.com",
