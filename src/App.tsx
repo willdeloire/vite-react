@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 
 export default function Dashboard() {
-  const [time, setTime] = useState("");
-  const [weather, setWeather] = useState("...");
-  const [news, setNews] = useState([]);
+  const [time, setTime] = useState<string>("");
+  const [weather, setWeather] = useState<string>("...");
+  const [news, setNews] = useState<any[]>([]);
 
   useEffect(() => {
     // ⏰ horloge
@@ -21,10 +21,9 @@ export default function Dashboard() {
       .catch(() => setWeather("--"));
 
     // 🧠 images thématiques fiables
-    const pickImage = (title = "") => {
+    const pickImage = (title: string = "") => {
       const t = title.toLowerCase();
 
-      // mots-clés plus précis
       if (t.match(/ukraine|russie|israel|gaza|attaque|armée|guerre|missile/)) {
         return "https://loremflickr.com/800/400/war,conflict";
       }
@@ -49,41 +48,34 @@ export default function Dashboard() {
         return "https://loremflickr.com/800/400/weather,climate";
       }
 
-      // fallback dynamique basé sur les mots du titre
-      const keywords = encodeURIComponent(title.split(" ").slice(0, 3).join(","));
+      const keywords = encodeURIComponent((title || "actu").split(" ").slice(0, 3).join(","));
       return `https://loremflickr.com/800/400/${keywords}`;
     };
 
-    // 📰 chargement news (Google fiable)
+    // 📰 chargement news
     const loadNews = () => {
       fetch("https://api.rss2json.com/v1/api.json?rss_url=https://news.google.com/rss?hl=fr&gl=FR&ceid=FR:fr")
         .then((r) => r.json())
         .then((d) => {
           const items = (d?.items || []).slice(0, 4);
 
-          const formatted = items.map((n) => ({
+          const formatted = items.map((n: any) => ({
             title: n.title,
             link: n.link,
             pubDate: n.pubDate,
             thumbnail: pickImage(n.title),
           }));
 
-          // 🧠 mise à jour intelligente (uniquement si nouvelles news)
-          setNews((prev) => {
+          setNews((prev: any[]) => {
             const prevTitles = prev.map((n) => n.title).join("|");
             const newTitles = formatted.map((n) => n.title).join("|");
 
-            // si identique → on ne change rien
-            if (prevTitles === newTitles) {
-              return prev;
-            }
-
-            // sinon → update
+            if (prevTitles === newTitles) return prev;
             return formatted;
           });
         })
         .catch(() => {
-          setNews((prev) => prev.length ? prev : [
+          setNews((prev: any[]) => prev.length ? prev : [
             {
               title: "Actualités indisponibles",
               pubDate: new Date().toISOString(),
@@ -95,7 +87,6 @@ export default function Dashboard() {
     };
 
     loadNews();
-    // 🔄 refresh toutes les 5 minutes
     const newsInterval = setInterval(loadNews, 300000);
 
     return () => {
@@ -108,13 +99,11 @@ export default function Dashboard() {
     <div style={{ minHeight: "100vh", background: "#f2f2f7", fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto", padding: "20px", color: "#111" }}>
       <div style={{ maxWidth: "900px", margin: "0 auto" }}>
 
-        {/* HEADER */}
         <div style={{ marginBottom: "20px" }}>
           <div style={{ fontSize: "28px", fontWeight: "600" }}>Aujourd’hui</div>
           <div style={{ color: "#666" }}>{time}</div>
         </div>
 
-        {/* CARDS */}
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "15px", marginBottom: "20px" }}>
           <div style={{ background: "white", borderRadius: "20px", padding: "20px", boxShadow: "0 10px 20px rgba(0,0,0,0.05)" }}>
             <div style={{ color: "#888" }}>Météo Paris</div>
@@ -127,28 +116,25 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* NEWS */}
         <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-
-          {news.slice(0, 3).map((n, i) => (
+          {news.slice(0, 3).map((n: any, i: number) => (
             <a key={i} href={n.link} target="_blank" rel="noopener noreferrer" style={{ textDecoration: "none", color: "inherit" }}>
               <div style={{ display: i === 0 ? "block" : "flex", background: "white", borderRadius: i === 0 ? "30px" : "20px", overflow: "hidden", cursor: "pointer", boxShadow: "0 10px 25px rgba(0,0,0,0.08)" }}>
 
-              <img
-                src={n.thumbnail}
-                alt=""
-                style={{ width: i === 0 ? "100%" : "40%", height: i === 0 ? "260px" : "auto", objectFit: "cover" }}
-              />
+                <img
+                  src={n.thumbnail}
+                  alt=""
+                  style={{ width: i === 0 ? "100%" : "40%", height: i === 0 ? "260px" : "auto", objectFit: "cover" }}
+                />
 
-              <div style={{ padding: "10px" }}>
-                <div style={{ fontWeight: "600" }}>{n.title}</div>
-                <div style={{ fontSize: "12px", color: "#888" }}>{new Date(n.pubDate).toLocaleString()}</div>
+                <div style={{ padding: "10px" }}>
+                  <div style={{ fontWeight: "600" }}>{n.title}</div>
+                  <div style={{ fontSize: "12px", color: "#888" }}>{new Date(n.pubDate).toLocaleString()}</div>
+                </div>
+
               </div>
-
-            </div>
             </a>
           ))}
-
         </div>
       </div>
     </div>
