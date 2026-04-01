@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-export default function Dashboard() {
+export default function App() {
   const [time, setTime] = useState<string>("");
   const [weather, setWeather] = useState<string>("...");
   const [news, setNews] = useState<any[]>([]);
