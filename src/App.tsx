@@ -25,7 +25,7 @@ export default function App() {
       })
       .catch(() => setWeather("--"));
 
-    const pickImage = (title = "") => {
+    const pickImage = (title: string = ""): string => {
       const t = title.toLowerCase();
 
       if (t.match(/ukraine|russie|israel|gaza|attaque|armée|guerre|missile/)) return "https://loremflickr.com/800/400/war";
@@ -43,14 +43,14 @@ export default function App() {
         .then((d) => {
           const items = (d?.items || []).slice(0, 4);
 
-          const formatted: NewsItem[] = items.map((n: any) => ({
+          const formatted: NewsItem[] = items.map((n: any): NewsItem => ( ({
             title: n.title,
             link: n.link,
             pubDate: n.pubDate,
             thumbnail: pickImage(n.title),
           }));
 
-          setNews((prev) => {
+          setNews((prev: NewsItem[]) => {
             const prevTitles = prev.map((n) => n.title).join("|");
             const newTitles = formatted.map((n) => n.title).join("|");
             return prevTitles === newTitles ? prev : formatted;
